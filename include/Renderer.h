@@ -18,16 +18,13 @@ public:
     {}
 
     void run() {
+        // set origin to center of screen
+        // and keep bounds of screen space between [-1, 1]
         view.setCenter({0, 0});
-        view.setSize({2.0f, -2.0f});
+        view.setSize({2.0f, -2.0f}); // flip y coordinate to match +y = up
         window.setView(view);
 
-        sf::RectangleShape rect{{POINT_SIZE, POINT_SIZE}};
-        rect.setOrigin(rect.getSize() / 2.f);
-        rect.setFillColor(sf::Color::Green);
-
         sf::Clock clock;
-
         float theta = 0;
         bool movingAway = true;
         float dz = 0.0f;
@@ -38,19 +35,17 @@ public:
         float speed = 0.30f;
         float moveSpeed = 1.f;
         while (window.isOpen()) {
+            handleEvents(window);
+
+            // update
             float dt = clock.restart().asSeconds();
             theta += 2*M_PI * speed * dt;
-            if (dz >= max_dz) {
-                movingAway = false;
-            } else if (dz <= min_dz) {
-                movingAway = true;
-            }
-
+            if (dz >= max_dz) movingAway = false;
+            else if (dz <= min_dz) movingAway = true;
             dz += (movingAway ? moveSpeed : -moveSpeed) * dt;
 
-            handleEvents(window);
+            // render
             window.clear();
-
             for (const auto& face : vertFaces) {
                 for (size_t i = 0; i < face.size(); ++i) {
                     drawLine(
@@ -59,7 +54,6 @@ public:
                     );
                 }
             }
-
             window.display();
         }
     }
@@ -72,20 +66,16 @@ private:
     static sf::Vector3f rotate_xz(const sf::Vector3f& pos, float theta) {
         float s = std::sinf(theta);
         float c = std::cosf(theta);
-
         float x = pos.x * c - pos.z * s;
         float z = pos.x * s + pos.z * c;
-
         return {x, pos.y, z};
     }
 
     static sf::Vector3f rotate_yz(const sf::Vector3f& pos, float theta) {
         float s = std::sinf(theta);
         float c = std::cosf(theta);
-
         float y = pos.y * c - pos.z * s;
         float z = pos.y * s + pos.z * c;
-
         return {pos.x, y, z};
     }
 
